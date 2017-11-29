@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -20,101 +21,121 @@ namespace PacketBatchFiller4
         /// </summary>
         protected override void OnAttached()
         {
-            AssociatedObject.GotFocus += AssociatedObject_GotFocus; 
+            AssociatedObject.GotFocus += AssociatedObject_GotFocus;
+            AssociatedObject.PreviewKeyDown += AssociatedObject_PreviewKeyDown;
         }
-        
-
+       
         /// <summary>
         /// Снимаем делегаты
         /// </summary>
         protected override void OnDetaching()
         {
             AssociatedObject.GotFocus -= AssociatedObject_GotFocus;
+            AssociatedObject.PreviewKeyDown -= AssociatedObject_PreviewKeyDown;
         }
 
         #endregion
 
         #region Methods
 
+
         private void AssociatedObject_GotFocus(object sender, RoutedEventArgs e)
         {
-            if (!TargetPopup.IsOpen)
+            if (TargetListBox.Items.Count > 1)
             {
+                //Открываем Popup
+                TargetPopup.StaysOpen = true;
                 TargetPopup.IsOpen = true;
-                TargetPopup.MouseEnter += TargetPopup_MouseEnter;
+
+                //Если потеряет фокус - убрать флаг StayOpen
+                AssociatedObject.LostFocus += SetStayOpenFalse;
+
+                //Подчищаем лишние делегаты
+                TargetPopup.Closed += TargetPopup_Closed;
+
+                //Начинаем отслеживать клавиатуру для навигации по элементам ListBox'а
+                TargetListBox.PreviewKeyDown += TargetListBox_PreviewKeyDown;
+                ((INotifyCollectionChanged) TargetListBox.Items).CollectionChanged +=
+                    ChangeIsOpenOnFocus_CollectionChanged;
             }
-            AssociatedObject.LostFocus += CloseTargetPopup;
-            AssociatedObject.GotFocus -= AssociatedObject_GotFocus;
+
         }
 
-        private void TargetPopup_MouseEnter(object sender, MouseEventArgs e)
+        private void ChangeIsOpenOnFocus_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            TargetPopup.MouseEnter -= TargetPopup_MouseEnter;
-            TargetPopup.MouseLeave += TargetPopup_MouseLeave;
-
-            AssociatedObject.LostFocus -= CloseTargetPopup;
-            TargetPopup.GotFocus += TargetPopup_GotFocus;
+            if (TargetListBox.Items.Count <= 1)
+            {
+                TargetPopup.StaysOpen = false;
+                TargetPopup.IsOpen = false;
+            }
+            else
+            {
+                
+            }
+                
         }
+
+        private void TargetPopup_Closed(object sender, EventArgs e)
+        {
+            //Popup закрыт - наводим чистоту
+            AssociatedObject.LostFocus -= SetStayOpenFalse;
+        }
+
+        private void SetStayOpenFalse(object sender, RoutedEventArgs routedEventArgs)
+        {
+            //Если Popup потеряет фокус - нужно его закрыть
+            TargetPopup.StaysOpen = false;
+        }
+
+
+        private void AssociatedObject_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            switch (e.Key)
+            {
+                case Key.Tab:
+                    TargetPopup.IsOpen = false;
+                    break;
+                case Key.Down:
+                    if (TargetListBox.Items.Count > 0)
+                    {
+                        TargetListBox.Focus();
+                        var listBoxItemToFocus =
+                            (ListBoxItem) TargetListBox
+                                .ItemContainerGenerator
+                                .ContainerFromItem(TargetListBox.Items[0]);
+                        listBoxItemToFocus.Focus();
+                    }
+                    e.Handled = true;
+                    break;
+                    default:
+                        
+                    break;
+
+            }
+        }
+
+        private void TargetListBox_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            switch (e.Key)
+            {
+                case Key.Up:
+                    if (Equals(TargetListBox.Items[0], TargetListBox.SelectedItem)) AssociatedObject.Focus();
+                    break;
+                case Key.Enter:
+                case Key.Space:
+                    ((TextBox) AssociatedObject).Text = TargetListBox.SelectedItem.ToString();
+                    AssociatedObject.Focus();
+                    ((TextBox) AssociatedObject).CaretIndex = ((TextBox) AssociatedObject).Text.Length;
+                    break;
+                    
+            }
+        }
+
         
-        private void TargetPopup_MouseLeave(object sender, MouseEventArgs e)
-        {
-            TargetPopup.MouseEnter += TargetPopup_MouseEnter;
-            AssociatedObject.LostFocus += CloseTargetPopup;
-        }
-        
-        private void TargetPopup_GotFocus(object sender, RoutedEventArgs e)
-        {
-            TargetPopup.LostFocus += CloseTargetPopup;
-            TargetPopup.GotFocus -= TargetPopup_GotFocus;
-
-            AssociatedObject.MouseEnter += AssociatedObject_MouseEnter;
-        }
-
-        private void AssociatedObject_MouseEnter(object sender, MouseEventArgs e)
-        {
-            AssociatedObject.MouseEnter -= AssociatedObject_MouseEnter;
-            AssociatedObject.MouseLeave += AssociatedObject_MouseLeave;
-
-            TargetPopup.LostFocus -= CloseTargetPopup;
-            AssociatedObject.GotFocus += AssociatedObject_GotFocus;
-
-        }
-
-        private void AssociatedObject_MouseLeave(object sender, MouseEventArgs e)
-        {
-            AssociatedObject.MouseEnter += AssociatedObject_MouseEnter;
-            TargetPopup.LostFocus += CloseTargetPopup;
-        }
-
-
-
-
-
-
-
-        /// <summary>
-        /// Метод при потере фокуса у <see cref="TextBox"/>
-        /// </summary>
-        private void CloseTargetPopup(object sender, RoutedEventArgs routedEventArgs)
-        {
-            TargetPopup.IsOpen = false;
-            //Устанавливаем изначальное состояние
-            TargetPopup.MouseEnter -= TargetPopup_MouseEnter;
-            TargetPopup.MouseLeave -= TargetPopup_MouseLeave;
-            TargetPopup.GotFocus -= TargetPopup_GotFocus;
-            TargetPopup.LostFocus -= CloseTargetPopup;
-
-            AssociatedObject.GotFocus += AssociatedObject_GotFocus;
-            AssociatedObject.LostFocus -= CloseTargetPopup;
-            AssociatedObject.MouseEnter -= AssociatedObject_MouseEnter;
-            AssociatedObject.MouseLeave -= AssociatedObject_MouseLeave;
-        }
 
         #endregion
 
-        #region Public poperties
-        
-
+        #region Public dependency poperties
 
         public static readonly DependencyProperty TargetPopupProperty = DependencyProperty.Register(
             "TargetPopup", typeof(Popup), typeof(ChangeIsOpenOnFocus),
@@ -127,6 +148,18 @@ namespace PacketBatchFiller4
         {
             get => (Popup)GetValue(TargetPopupProperty);
             set => SetValue(TargetPopupProperty, value);
+        }
+
+        public static readonly DependencyProperty TargetListBoxProperty = DependencyProperty.Register(
+            "TargetListBox", typeof(ListBox), typeof(ChangeIsOpenOnFocus), new PropertyMetadata(default(ListBox)));
+
+        /// <summary>
+        /// <see cref="ListBox"/> у которого работаем с выбранными элементами клавиатурой 
+        /// </summary>
+        public ListBox TargetListBox
+        {
+            get => (ListBox) GetValue(TargetListBoxProperty);
+            set => SetValue(TargetListBoxProperty, value);
         }
 
         #endregion

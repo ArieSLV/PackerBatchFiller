@@ -20,14 +20,15 @@
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
                 <i:Interaction.Behaviors>
-                    <local:ChangeIsOpenOnFocus TargetPopup="{Binding ElementName=Popup}" />
+                    <local:ChangeIsOpenOnFocus TargetPopup="{Binding ElementName=Popup}" TargetListBox="{Binding ElementName=SuggestList}"/>
                 </i:Interaction.Behaviors>
             </TextBox>
             <Popup
                 Name="Popup"
                 Width="{Binding ElementName=SearchingTextBox, Path=Width}"
                 Placement="Bottom"
-                PlacementTarget="{Binding ElementName=SearchingTextBox}">
+                PlacementTarget="{Binding ElementName=SearchingTextBox}"
+                AllowsTransparency="True">
                 <Border>
                     <Grid>
                         <Grid.ColumnDefinitions>

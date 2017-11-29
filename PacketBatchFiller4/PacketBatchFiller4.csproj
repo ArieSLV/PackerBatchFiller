@@ -118,7 +118,7 @@
     <Compile Include="Models\UnitEntitysModels\Unit.cs" />
     <Compile Include="DataAccess\PBF4Db.cs" />
     <Compile Include="Properties\Annotations.cs" />
-    <Compile Include="Suggestable.cs" />
+    <Compile Include="Interfaces\Suggestable.cs" />
     <Compile Include="ValueConverters\BaseValueConverter.cs" />
     <Compile Include="ValueConverters\SuggestModule\BoolToVisibilityVisible.cs" />
     <Compile Include="ValueConverters\SuggestModule\IntZeroToBoolTrue.cs" />
