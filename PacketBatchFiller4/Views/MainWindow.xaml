@@ -1,0 +1,69 @@
+﻿<Window
+    x:Class="PacketBatchFiller4.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+    xmlns:local="clr-namespace:PacketBatchFiller4"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="MainWindow"
+    Width="525"
+    Height="350"
+    mc:Ignorable="d">
+    <DockPanel LastChildFill="True">
+
+        <DockPanel DockPanel.Dock="Top" LastChildFill="True">
+
+            <Label Content="Фильтр" DockPanel.Dock="Left" />
+            <TextBox DockPanel.Dock="Right" />
+        </DockPanel>
+
+
+        <DockPanel DockPanel.Dock="Bottom" LastChildFill="True">
+            <StackPanel DockPanel.Dock="Left" Orientation="Vertical">
+                <Button>
+                    <Label Content="Добавить физическое лицо" />
+                </Button>
+                <Button Command="{Binding EditUnitCommand}">
+                    <Label Content="Редактировать лицо..." />
+                </Button>
+                <Button Command="{Binding RemoveUnitCommand}">
+                    <Label Content="Удалить лицо..." />
+                </Button>
+
+                <Button Command="{Binding TestCommand}">
+                    <Label Content="{Binding Citizenship, FallbackValue=test}" />
+                </Button>
+            </StackPanel>
+            <StackPanel DockPanel.Dock="Left">
+                <local:CitizenshipSuggestControl MinWidth="600" MaxHeight="700" />
+                <TextBlock Text="1This is a test text! This is a test text! This is a test text! This is a test text! " />
+                <TextBlock Text="2This is a test text! This is a test text! This is a test text! This is a test text! " />
+                <TextBlock Text="3This is a test text! This is a test text! This is a test text! This is a test text! " />
+                <TextBlock Text="4This is a test text! This is a test text! This is a test text! This is a test text! " />
+                <TextBlock Text="5This is a test text! This is a test text! This is a test text! This is a test text! " />
+                <TextBlock Text="6This is a test text! This is a test text! This is a test text! This is a test text! " />
+                <TextBlock Text="7This is a test text! This is a test text! This is a test text! This is a test text! " />
+                <TextBlock Text="{Binding Citizenship}" />
+
+            </StackPanel>
+            <!--<ListBox
+                MinWidth="600"
+                MaxHeight="700"
+                DockPanel.Dock="Left"
+                ItemsSource="{Binding Citizenships}"
+                SelectedItem="{Binding SelectedUnit}">
+            -->
+            <!--<i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseDoubleClick">
+                        <catel:EventToCommand Command="{Binding EditUnitCommand}" DisableAssociatedObjectOnCannotExecute="False" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>-->
+            <!--
+
+
+            </ListBox>-->
+        </DockPanel>
+
+    </DockPanel>
+</Window>
